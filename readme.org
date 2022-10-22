@@ -51,6 +51,7 @@
     - [[#c][C]]
     - [[#css][CSS]]
     - [[#terraform][Terraform]]
+  - [[#global-key-bindings][Global key bindings]]
   - [[#post-initialisation][Post Initialisation]]
 
 ** About this file
@@ -198,6 +199,27 @@ Some default settings aka sanity defaults
 
 #+END_SRC
 *** Package Management
+**** straight.el
+- [[https://github.com/radian-software/straight.el][radian-software/straight.el: Next-generation, purely functional package manager for the Emacs hacker.]]
+
+Straight.el is a modern package manager for emacs, it allows me to
+load packages directly from Git/GitHub. It also integrates with
+use-package (see later in file).
+
+#+begin_src elisp
+  (defvar bootstrap-version)
+  (let ((bootstrap-file
+         (expand-file-name "straight/repos/straight.el/bootstrap.el" user-emacs-directory))
+        (bootstrap-version 6))
+    (unless (file-exists-p bootstrap-file)
+      (with-current-buffer
+          (url-retrieve-synchronously
+           "https://raw.githubusercontent.com/radian-software/straight.el/develop/install.el"
+           'silent 'inhibit-cookies)
+        (goto-char (point-max))
+        (eval-print-last-sexp)))
+    (load bootstrap-file nil 'nomessage))
+#+end_src
 
 **** Package Settings
 We're going to set the =load-path= ourselves and avoid calling =(package-initilize)= (for
@@ -268,7 +290,10 @@ previously compiled manually then all of the package initialization will still t
       (package-install 'bind-key))
     (require 'use-package)
     (require 'bind-key)
-    (setq use-package-always-ensure t))
+    (setq use-package-always-ensure t)
+    (use-package el-patch
+      :straight t)
+    )
 #+END_SRC
 
 
@@ -1061,7 +1086,7 @@ package that automatically generates an up to date table of contents for us.
   #+END_SRC
 
 Use smartparens
-#+BEGIN_SRC
+#+BEGIN_SRC elisp
   (use-package smartparens
   :ensure    smartparens
   :init      (progn
@@ -1073,25 +1098,7 @@ Use smartparens
               (sp-local-pair 'emacs-lisp-mode "`" nil :when '(sp-in-string-p))
               (sp-with-modes '(html-mode sgml-mode nxml-mode web-mode)
                 (sp-local-pair "<" ">"))
-  :bind
-  (("C-M-k" . sp-kill-sexp-with-a-twist-of-lime)
-   ("C-M-f" . sp-forward-sexp)
-   ("C-M-b" . sp-backward-sexp)
-   ("C-M-n" . sp-up-sexp)
-   ("C-M-d" . sp-down-sexp)
-   ("C-M-u" . sp-backward-up-sexp)
-   ("C-M-p" . sp-backward-down-sexp)
-   ("C-M-w" . sp-copy-sexp)
-   ("M-s" . sp-splice-sexp)
-   ("M-r" . sp-splice-sexp-killing-around)
-   ("C-)" . sp-forward-slurp-sexp)
-   ("C-}" . sp-forward-barf-sexp)
-   ("C-(" . sp-backward-slurp-sexp)
-   ("C-{" . sp-backward-barf-sexp)
-   ("M-S" . sp-split-sexp)
-   ("M-J" . sp-join-sexp)
-   ("C-M-t" . sp-transpose-sexp))
-  :delight " ⎎")
+  :delight " ⎎"))
 #+END_SRC
 
 use rainbow delimiters
@@ -1171,7 +1178,10 @@ da-bomb!
 #+END_SRC
 *** Rust
 #+begin_src elisp
-  (use-package rust-mode)
+    (use-package rust-mode)
+    (use-package cargo
+      :straight (:host github :repo "jmn/cargo.el"
+             :branch "master"))
 #+end_src
 *** Javascript
    JavaScript should have three parts:
@@ -1325,6 +1335,12 @@ pretty terraform highlighting
 ;;    :config (setq terraform-indent-level 2)
 ;;    )
 #+END_SRC
+
+** TODO Global key bindings
+For some reason use-package `:bind` isn't working after installing straight.el.
+#+begin_src elisp
+  (global-set-key (kbd "C-c m") 'magit-status)
+#+end_src
 
 #+RESULTS:
 
