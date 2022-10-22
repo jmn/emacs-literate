@@ -530,7 +530,9 @@ highlights
 )
 #+END_SRC
 *** Wordsmithing
- options for dealing with text and words
+ options for dealing with text and words.
+
+- [[https://forums.gentoo.org/viewtopic-p-8694208.html?sid=c47a21173fe5bee690cfd82cd06bf96b][Gentoo Forums :: View topic - emacs rust clippy integration issue [fixed]​]]
 #+BEGIN_SRC emacs-lisp
 (prefer-coding-system 'utf-8)
 (set-default-coding-systems 'utf-8)
@@ -1183,8 +1185,18 @@ da-bomb!
 
 #+END_SRC
 *** Rust
+- [[https://emacs-lsp.github.io/lsp-mode/tutorials/how-to-turn-off/][A guide on disabling/enabling lsp-mode features - LSP Mode - LSP support for Emacs]]
+- [[https://robert.kra.hn/posts/rust-emacs-setup/][Configuring Emacs for Rust development | Robert Krahn]]
+
+~~I currently am prefering to use Rustic together with eglot because I
+sometimes use standalone rust files which aren't yet supported by
+lsp-mode.  But they are supported experimentally (customize
+rustic-enable-detached-file-support) in Rustic with eglot.
+~~
+I wish there was standalone file support in lsp-mode.
+
 #+begin_src elisp
-    (use-package rust-mode)
+    (use-package rustic)
     (use-package cargo
       :straight (:host github :repo "jmn/cargo.el"
              :branch "master"))
