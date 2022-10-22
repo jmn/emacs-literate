@@ -44,8 +44,9 @@
     - [[#clojure][Clojure]]
     - [[#parens][Parens]]
     - [[#cider][Cider]]
+    - [[#rust][Rust]]
     - [[#javascript][Javascript]]
-- [[#js2-mode][JS2 Mode]]
+    - [[#lsp---language-server-protocol][LSP - Language Server Protocol]]
     - [[#yaml][YAML]]
     - [[#c][C]]
     - [[#css][CSS]]
@@ -596,45 +597,45 @@ company mode TAB
 
 Use dired Plus dired-x
 #+BEGIN_SRC emacs-lisp
-(use-package dired
-  :ensure nil
-;  :defer t
-  :config
-  ;; dired - reuse current buffer by pressing 'a'
-  (progn
-    (put 'dired-find-alternate-file 'disabled nil)
+  (use-package dired
+    :ensure nil
+  ;  :defer t
+    :config
+    ;; dired - reuse current buffer by pressing 'a'
+    (progn
+      (put 'dired-find-alternate-file 'disabled nil)
 
-    ;; always delete and copy recursively
-    (setq dired-recursive-deletes 'always)
-    (setq dired-recursive-copies 'always)
+      ;; always delete and copy recursively
+      (setq dired-recursive-deletes 'always)
+      (setq dired-recursive-copies 'always)
 
-    ;; if there is a dired buffer displayed in the next window, use its
-    ;; current subdir, instead of the current subdir of this dired buffer
-    (setq dired-dwim-target t)
+      ;; if there is a dired buffer displayed in the next window, use its
+      ;; current subdir, instead of the current subdir of this dired buffer
+      (setq dired-dwim-target t)
 
-    ;; enable some really cool extensions like C-x C-j(dired-jump)
-    (require 'dired-x)
-   )
-  )
+      ;; enable some really cool extensions like C-x C-j(dired-jump)
+      (require 'dired-x)
+     )
+    )
 
-;; revert buffers automatically when underlying files are changed externally
-(global-auto-revert-mode t)
+  ;; revert buffers automatically when underlying files are changed externally
+  (global-auto-revert-mode t)
 
-;;; Completion, snippets
+  ;;; Completion, snippets
 
-(use-package company
-  :diminish company-mode
-  :ensure t
-  :defer t
-  :config
-  (progn
-    (global-company-mode)
-    (bind-key "M-TAB" 'company-select-next company-active-map)
-    (setq company-tooltip-align-annotations t
-          company-dabbrev-downcase nil
-          company-dabbrev-code-everywhere t
-          company-dabbrev-ignore-case nil))
-   )
+  (use-package company
+    :diminish company-mode
+    :ensure t
+    :defer t
+    :config
+    (progn
+      ;;    (global-company-mode)
+      (bind-key "M-TAB" 'company-select-next company-active-map)
+      (setq company-tooltip-align-annotations t
+            company-dabbrev-downcase nil
+            company-dabbrev-code-everywhere t
+            company-dabbrev-ignore-case nil))
+     )
 
 
 #+END_SRC
@@ -722,6 +723,7 @@ save place and recent files
    #+BEGIN_SRC elisp
      (use-package magit
        :ensure t
+       :requires ido-completing-read+
        :commands magit-status magit-blame
        :init
        (defadvice magit-status (around magit-fullscreen activate)
@@ -1167,35 +1169,41 @@ da-bomb!
 
 
 #+END_SRC
+*** Rust
+#+begin_src elisp
+  (use-package rust-mode)
+#+end_src
 *** Javascript
    JavaScript should have three parts:
    - Syntax highlight (already included)
    - Syntax verification (with flycheck)
    - Interactive REPL ... using Skewer
 
-* JS2 Mode
+*** LSP - Language Server Protocol
+- [[https://emacs-lsp.github.io/lsp-mode/page/installation/][Installation - LSP Mode - LSP support for Emacs]]
 
-  I like the extras found in [[http://www.emacswiki.org/emacs-test/SteveYegge][Steve Yegge]]'s [[https://github.com/mooz/js2-mode][js2-mode]].
-
-  #+BEGIN_SRC elisp
-    (use-package js2-mode
-      :ensure t
-      :interpreter ("node" . js2-mode)
+#+begin_src elisp
+  (use-package lsp-mode
       :init
-      (setq js-basic-indent 2)
-      (setq-default js2-basic-indent 2
-                    js2-basic-offset 2
-                    js2-auto-indent-p t
-                    js2-cleanup-whitespace t
-                    js2-enter-indents-newline t
-                    js2-indent-on-enter-key t
-                    js2-global-externs (list "window" "module" "require" "buster" "sinon" "assert" "refute" "setTimeout" "clearTimeout" "setInterval" "clearInterval" "location" "__dirname" "console" "JSON" "jQuery" "$"))
+      ;; set prefix for lsp-command-keymap (few alternatives - "C-l", "C-c l")
+      (setq lsp-keymap-prefix "C-c l")
+      :hook (
+             (js-mode . lsp)
+             (rust-mode . lsp)
+             (lsp-mode . lsp-enable-which-key-integration))
+      :commands lsp)
 
-      (add-hook 'js2-mode-hook
-                (lambda ()
-                  (push '("function" . ?ƒ) prettify-symbols-alist)))
+  (use-package lsp-ui :commands lsp-ui-mode)
+#+end_src
+**** JS Mode
 
-      (add-to-list 'auto-mode-alist '("\\.js$" . js2-mode)))
+#+begin_src elisp
+    (use-package typescript-mode)
+
+#+end_src
+  #+BEGIN_SRC elisp
+    (add-to-list 'auto-mode-alist '("\\.ts\\'" . js-jsx-mode))
+    (add-to-list 'auto-mode-alist '("\\.tsx\\'" . js-jsx-mode))
   #+END_SRC
 
   Colour /defined/ variables with [[https://github.com/ankurdave/color-identifiers-mode][color-identifiers-mode]]:
@@ -1204,7 +1212,7 @@ da-bomb!
    (use-package color-identifiers-mode
        :ensure t
        :init
-         (add-hook 'js2-mode-hook 'color-identifiers-mode))
+         (add-hook 'js-mode-hook 'color-identifiers-mode))
   #+END_SRC
 
 **** Flycheck and JSHint
