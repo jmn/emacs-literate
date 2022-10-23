@@ -433,15 +433,16 @@ old Use material theme
 highlights
 
 #+BEGIN_SRC emacs-lisp
-;; highlight the current line
-(global-hl-line-mode +1)
+  ;; highlight the current line
+  (global-hl-line-mode +1)
 
-(use-package diff-hl
-  :ensure t
-  :config
-  (global-diff-hl-mode +1)
-  (add-hook 'dired-mode-hook 'diff-hl-dired-mode)
-  (add-hook 'magit-post-refresh-hook 'diff-hl-magit-post-refresh))
+  (use-package diff-hl
+    :ensure t
+    :defer nil
+    :config
+    (global-diff-hl-mode +1)
+    (add-hook 'dired-mode-hook 'diff-hl-dired-mode)
+    (add-hook 'magit-post-refresh-hook 'diff-hl-magit-post-refresh))
 #+END_SRC
 *** LineNumbers
 #+BEGIN_SRC elisp
@@ -585,11 +586,22 @@ highlights
  Various keywords (in comments) are now flagged in a Red Error font:
 
     #+BEGIN_SRC emacs-lisp
+      (use-package hl-todo
+        :hook (prog-mode . hl-todo-mode)
+        :config
+        (setq hl-todo-highlight-punctuation ":"
+              hl-todo-keyword-faces
+              `(("TODO"       warning bold)
+                ("FIXME"      error bold)
+                ("HACK"       font-lock-constant-face bold)
+                ("REVIEW"     font-lock-keyword-face bold)
+                ("NOTE"       success bold)
+                ("DEPRECATED" font-lock-doc-face bold))))
       (add-hook 'prog-common-hook
-         (lambda ()
-         (font-lock-add-keywords nil
-         '(("\\<\\(FIX\\|FIXME\\|TODO\\|BUG\\|HACK\\):"
-                1 font-lock-warning-face t)))))
+                (lambda ()
+                  (font-lock-add-keywords nil
+                                          '(("\\<\\(FIX\\|FIXME\\|TODO\\|BUG\\|HACK\\):"
+                                             1 font-lock-warning-face t)))))
     #+END_SRC
 
 *** Fill Mode
@@ -627,45 +639,45 @@ company mode TAB
 
 Use dired Plus dired-x
 #+BEGIN_SRC emacs-lisp
-  (use-package dired
-    :ensure nil
-  ;  :defer t
-    :config
-    ;; dired - reuse current buffer by pressing 'a'
-    (progn
-      (put 'dired-find-alternate-file 'disabled nil)
+   (use-package dired
+     :ensure nil
+   ;  :defer t
+     :config
+     ;; dired - reuse current buffer by pressing 'a'
+     (progn
+       (put 'dired-find-alternate-file 'disabled nil)
 
-      ;; always delete and copy recursively
-      (setq dired-recursive-deletes 'always)
-      (setq dired-recursive-copies 'always)
+       ;; always delete and copy recursively
+       (setq dired-recursive-deletes 'always)
+       (setq dired-recursive-copies 'always)
 
-      ;; if there is a dired buffer displayed in the next window, use its
-      ;; current subdir, instead of the current subdir of this dired buffer
-      (setq dired-dwim-target t)
+       ;; if there is a dired buffer displayed in the next window, use its
+       ;; current subdir, instead of the current subdir of this dired buffer
+       (setq dired-dwim-target t)
 
-      ;; enable some really cool extensions like C-x C-j(dired-jump)
-      (require 'dired-x)
+       ;; enable some really cool extensions like C-x C-j(dired-jump)
+       (require 'dired-x)
+      )
      )
-    )
 
-  ;; revert buffers automatically when underlying files are changed externally
+   ;; revert buffers automatically when underlying files are changed externally
   (global-auto-revert-mode t)
 
-  ;;; Completion, snippets
+   ;;; Completion, snippets
 
-  (use-package company
-    :diminish company-mode
-    :ensure t
-    :defer t
-    :config
-    (progn
-      ;;    (global-company-mode)
-      (bind-key "M-TAB" 'company-select-next company-active-map)
-      (setq company-tooltip-align-annotations t
-            company-dabbrev-downcase nil
-            company-dabbrev-code-everywhere t
-            company-dabbrev-ignore-case nil))
-     )
+   (use-package company
+     :diminish company-mode
+     :ensure t
+     :defer t
+     :config
+     (progn
+       ;;    (global-company-mode)
+       (bind-key "M-TAB" 'company-select-next company-active-map)
+       (setq company-tooltip-align-annotations t
+             company-dabbrev-downcase nil
+             company-dabbrev-code-everywhere t
+             company-dabbrev-ignore-case nil))
+      )
 
 
 #+END_SRC
@@ -911,13 +923,13 @@ MacOS Customisations
 
   (when (display-graphic-p)
     (if is-mac
-	(menu-bar-mode 1)))
+    (menu-bar-mode 1)))
 
   ;; Make Meta command and add Hyper.
   (when is-mac
-  (setq mac-option-modifier nil
-      mac-command-modifier 'meta
-      x-select-enable-clipboard t)
+   (setq mac-option-modifier nil
+       mac-command-modifier 'meta
+    x-select-enable-clipboard t)
 
     ;; Change command to meta.
   ;;  (setq mac-command-modifier 'super)
@@ -1215,14 +1227,23 @@ I wish there was standalone file support in lsp-mode.
       :init
       ;; set prefix for lsp-command-keymap (few alternatives - "C-l", "C-c l")
       (setq lsp-keymap-prefix "C-c l")
+      :defer nil
+      :demand t
       :hook (
              (js-mode . lsp)
              (rust-mode . lsp)
-             (lsp-mode . lsp-enable-which-key-integration))
+             (lsp-mode . lsp-enable-which-key-integration)
+
+             ;; FIXME: This requires me to open rustic twice to have clippy interation.
+             (rustic-mode . (lambda ()
+                              (lsp-deferred)
+                              (flycheck-add-next-checker 'lsp 'rustic-clippy)))
+             )
       :commands lsp)
 
   (use-package lsp-ui :commands lsp-ui-mode)
-#+end_src
+  #+end_src
+
 **** JS Mode
 
 #+begin_src elisp
