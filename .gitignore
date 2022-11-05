@@ -13,3 +13,4 @@ auto-save-list/
 /savefile/
 *.~undo-tree~
 /server/
+/eshell/

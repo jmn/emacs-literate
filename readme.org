@@ -208,15 +208,15 @@ use-package (see later in file).
 #+begin_src elisp
   (defvar bootstrap-version)
   (let ((bootstrap-file
-         (expand-file-name "straight/repos/straight.el/bootstrap.el" user-emacs-directory))
-        (bootstrap-version 6))
+	 (expand-file-name "straight/repos/straight.el/bootstrap.el" user-emacs-directory))
+	(bootstrap-version 6))
     (unless (file-exists-p bootstrap-file)
       (with-current-buffer
-          (url-retrieve-synchronously
-           "https://raw.githubusercontent.com/radian-software/straight.el/develop/install.el"
-           'silent 'inhibit-cookies)
-        (goto-char (point-max))
-        (eval-print-last-sexp)))
+	  (url-retrieve-synchronously
+	   "https://raw.githubusercontent.com/radian-software/straight.el/develop/install.el"
+	   'silent 'inhibit-cookies)
+	(goto-char (point-max))
+	(eval-print-last-sexp)))
     (load bootstrap-file nil 'nomessage))
   (straight-use-package 'use-package)
   (use-package el-patch
@@ -246,7 +246,7 @@ to not automatically call it on our behalf. Additionally we're setting
 Tell =use-package= to always defer loading packages unless explicitly told otherwise. This speeds up
 initialization significantly as many packages are only loaded later when they are explicitly used.
 
-#+BEGIN_SRC emacs-lisp
+#+BEGIN_SRC emacs-lisp :tangle no
   (setq use-package-always-defer t
         use-package-verbose t)
 #+END_SRC
@@ -570,15 +570,15 @@ highlights
   ;;   (if (file-exists-p abbrev-file-name)
   ;;       (quietly-read-abbrev-file)))
 
-  (use-package flyspell
-    :config
-      (when (eq system-type 'windows-nt)
-        (add-to-list 'exec-path "C:/Program Files (x86)/Aspell/bin/"))
-      (setq ispell-program-name "aspell" ; use aspell instead of ispell
-           ispell-extra-args '("--sug-mode=ultra"))
-      (add-hook 'text-mode-hook #'flyspell-mode)
-      (add-hook 'prog-mode-hook #'flyspell-prog-mode)
-    :delight "")
+  ;; (use-package flyspell
+  ;;   :config
+  ;;     (when (eq system-type 'windows-nt)
+  ;;       (add-to-list 'exec-path "C:/Program Files (x86)/Aspell/bin/"))
+  ;;     (setq ispell-program-name "aspell" ; use aspell instead of ispell
+  ;;          ispell-extra-args '("--sug-mode=ultra"))
+  ;;     (add-hook 'text-mode-hook #'flyspell-mode)
+  ;;     (add-hook 'prog-mode-hook #'flyspell-prog-mode)
+  ;;   :delight "")
 
   (use-package flycheck
     :ensure t
@@ -644,48 +644,44 @@ company mode TAB
 *** Files
 
 Use dired Plus dired-x
-#+BEGIN_SRC emacs-lisp :tangle no
-   (use-package dired
-     :ensure nil
-   ;  :defer t
-     :config
-     ;; dired - reuse current buffer by pressing 'a'
-     (progn
-       (put 'dired-find-alternate-file 'disabled nil)
+#+BEGIN_SRC emacs-lisp
+   ;; (use-package dired
+   ;;   :ensure nil
+   ;; ;  :defer t
+   ;;   :config
+   ;;   ;; dired - reuse current buffer by pressing 'a'
+   ;;   (progn
+   ;;     (put 'dired-find-alternate-file 'disabled nil)
 
-       ;; always delete and copy recursively
-       (setq dired-recursive-deletes 'always)
-       (setq dired-recursive-copies 'always)
+   ;;     ;; always delete and copy recursively
+   ;;     (setq dired-recursive-deletes 'always)
+   ;;     (setq dired-recursive-copies 'always)
 
-       ;; if there is a dired buffer displayed in the next window, use its
-       ;; current subdir, instead of the current subdir of this dired buffer
-       (setq dired-dwim-target t)
+   ;;     ;; if there is a dired buffer displayed in the next window, use its
+   ;;     ;; current subdir, instead of the current subdir of this dired buffer
+   ;;     (setq dired-dwim-target t)
 
-       ;; enable some really cool extensions like C-x C-j(dired-jump)
-       (require 'dired-x)
-      )
-     )
+   ;;     ;; enable some really cool extensions like C-x C-j(dired-jump)
+   ;;     (require 'dired-x)
+   ;;    )
+   ;;   )
 
    ;; revert buffers automatically when underlying files are changed externally
   (global-auto-revert-mode t)
 
    ;;; Completion, snippets
-
    (use-package company
      :diminish company-mode
      :ensure t
-     :defer t
      :config
      (progn
-       ;;    (global-company-mode)
+       (global-company-mode t)
        (bind-key "M-TAB" 'company-select-next company-active-map)
        (setq company-tooltip-align-annotations t
              company-dabbrev-downcase nil
              company-dabbrev-code-everywhere t
              company-dabbrev-ignore-case nil))
       )
-
-
 #+END_SRC
 save place and recent files
 #+BEGIN_SRC emacs-lisp
@@ -803,7 +799,7 @@ save place and recent files
 Projectile is a quick and easy project management package that "just works". We're
 going to install it and make sure it's loaded immediately.
 
-#+BEGIN_SRC emacs-lisp
+#+BEGIN_SRC emacs-lisp :tangle no
   (use-package projectile
     :ensure projectile
   ;;  :demand t
@@ -897,8 +893,8 @@ going to install it and make sure it's loaded immediately.
 *** Org
 #+BEGIN_SRC emacs-lisp
   (use-package org
+    :straight (:type built-in)
     :delight org-mode "✎"
-    :defer t
     :config
     (defun jmn/url-get-title (url &optional descr)
       "Takes a URL and returns the value of the <title> HTML tag,
@@ -1127,64 +1123,65 @@ use rainbow delimiters
 *** Cider
 da-bomb!
 #+BEGIN_SRC emacs-lisp
-   (use-package cider
-  :ensure t
-;;  :commands (cider cider-connect cider-jack-in)
-  :init
-  (setq cider-auto-select-error-buffer t
-        ;; go right to the REPL buffer when it's finished connecting
-        cider-repl-pop-to-buffer-on-connect 'display-only
-        cider-repl-use-clojure-font-lock t
-        ;; Wrap when navigating history.
-        cider-repl-wrap-history t
-        cider-repl-history-size 1000
-        ;; When there's a cider error, show its buffer and switch to it
-        cider-show-error-buffer t
-        cider-auto-select-error-buffer t
-        nrepl-hide-special-buffers t
-        ;; Stop error buffer from popping up while working in buffers other than the REPL:
-        nrepl-popup-stacktraces nil
-        ;; Where to store the cider history.
-        cider-repl-history-file "~/.emacs.d/cider-history"
-        )
+  (use-package cider
+    :defer t
+    :ensure t
+    ;;  :commands (cider cider-connect cider-jack-in)
+    :init
+    (setq cider-auto-select-error-buffer t
+          ;; go right to the REPL buffer when it's finished connecting
+          cider-repl-pop-to-buffer-on-connect 'display-only
+          cider-repl-use-clojure-font-lock t
+          ;; Wrap when navigating history.
+          cider-repl-wrap-history t
+          cider-repl-history-size 1000
+          ;; When there's a cider error, show its buffer and switch to it
+          cider-show-error-buffer t
+          cider-auto-select-error-buffer t
+          nrepl-hide-special-buffers t
+          ;; Stop error buffer from popping up while working in buffers other than the REPL:
+          nrepl-popup-stacktraces nil
+          ;; Where to store the cider history.
+          cider-repl-history-file "~/.emacs.d/cider-history"
+          )
 
-  :config
-  (progn ;; (defalias 'cji 'cider-jack-in)
-    (add-hook 'cider-mode-hook #'eldoc-mode)
-    (add-hook 'cider-repl-mode-hook #'eldoc-mode)
-  ;;  (add-hook 'cider-repl-mode-hook #'smartparens-strict-mode)
-    (add-hook 'cider-repl-mode-hook #'company-mode)
-    (add-hook 'cider-mode-hook #'company-mode)
-    (add-hook 'cider-repl-mode-hook #'cider-company-enable-fuzzy-completion)
-    (add-hook 'cider-mode-hook #'cider-company-enable-fuzzy-completion)
-    ;; (add-hook 'cider-repl-mode-hook #'paredit-mode)
-    (add-hook 'cider-repl-mode-hook #'rainbow-delimiters-mode)
+    :config
+    (progn ;; (defalias 'cji 'cider-jack-in)
+      (add-hook 'cider-mode-hook #'eldoc-mode)
+      (add-hook 'cider-repl-mode-hook #'eldoc-mode)
+      ;;  (add-hook 'cider-repl-mode-hook #'smartparens-strict-mode)
+      (add-hook 'cider-repl-mode-hook #'company-mode)
+      (add-hook 'cider-mode-hook #'company-mode)
+      (add-hook 'cider-repl-mode-hook #'cider-company-enable-fuzzy-completion)
+      (add-hook 'cider-mode-hook #'cider-company-enable-fuzzy-completion)
+      ;; (add-hook 'cider-repl-mode-hook #'paredit-mode)
+      (add-hook 'cider-repl-mode-hook #'rainbow-delimiters-mode)
+      )
+    :diminish  (cider-mode . "☤")
     )
-  :diminish  (cider-mode . "☤")
-)
 
   (setq cider-cljs-lein-repl
-      "(cond
-   (and (resolve 'user/run) (resolve 'user/browser-repl)) ;; Chestnut projects
-   (eval '(do (user/run)
-             (user/browser-repl)))
+        "(cond
+     (and (resolve 'user/run) (resolve 'user/browser-repl)) ;; Chestnut projects
+     (eval '(do (user/run)
+               (user/browser-repl)))
 
-   (try
-    (require 'figwheel-sidecar.repl-api)
-    (resolve 'figwheel-sidecar.repl-api/start-figwheel!)
-    (catch Throwable _))
-   (eval '(do (figwheel-sidecar.repl-api/start-figwheel!)
-             (figwheel-sidecar.repl-api/cljs-repl)))
+     (try
+      (require 'figwheel-sidecar.repl-api)
+      (resolve 'figwheel-sidecar.repl-api/start-figwheel!)
+      (catch Throwable _))
+     (eval '(do (figwheel-sidecar.repl-api/start-figwheel!)
+               (figwheel-sidecar.repl-api/cljs-repl)))
 
-   (try
-    (require 'cemerick.piggieback)
-    (resolve 'cemerick.piggieback/cljs-repl)
-    (catch Throwable _))
-   (eval '(cemerick.piggieback/cljs-repl (cljs.repl.rhino/repl-env)))
+     (try
+      (require 'cemerick.piggieback)
+      (resolve 'cemerick.piggieback/cljs-repl)
+      (catch Throwable _))
+     (eval '(cemerick.piggieback/cljs-repl (cljs.repl.rhino/repl-env)))
 
-   :else
-   (throw (ex-info \"Failed to initialise CLJS repl. Add com.cemerick/piggieback
-       and optionally figwheel-sidecar to your project.\" {})))")
+     :else
+     (throw (ex-info \"Failed to initialise CLJS repl. Add com.cemerick/piggieback
+         and optionally figwheel-sidecar to your project.\" {})))")
 
 
 #+END_SRC
