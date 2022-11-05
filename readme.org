@@ -218,6 +218,10 @@ use-package (see later in file).
         (goto-char (point-max))
         (eval-print-last-sexp)))
     (load bootstrap-file nil 'nomessage))
+  (straight-use-package 'use-package)
+  (use-package el-patch
+  :straight t)
+  (setq straight-use-package-by-default t)
 #+end_src
 
 **** Package Settings
@@ -290,8 +294,6 @@ previously compiled manually then all of the package initialization will still t
     (require 'use-package)
     (require 'bind-key)
     (setq use-package-always-ensure t)
-    (use-package el-patch
-      :straight t)
     )
 #+END_SRC
 
@@ -432,7 +434,7 @@ old Use material theme
 #+END_SRC
 highlights
 
-#+BEGIN_SRC emacs-lisp
+#+BEGIN_SRC emacs-lisp :tangle no
   ;; highlight the current line
   (global-hl-line-mode +1)
 
@@ -473,8 +475,12 @@ highlights
   This is a really neat font that works particularly well. You just have to go to their site,
   define the characteristics you want for it, download and install it locally.
   #+BEGIN_SRC emacs-lisp
-  ;;Use the Input Sans font size 12
-  (set-frame-font "Input Sans Condensed-14")
+    ;;Use the Input Sans font size 12
+
+    (if (eq system-type 'darwin)
+	(set-frame-font "Input Sans Condensed-14")
+      (set-frame-font "InputSansCondensed-14")
+      )
   #+END_SRC
 
   And the best coloured highlighting of selected text needs to be both
@@ -535,50 +541,50 @@ highlights
 
 - [[https://forums.gentoo.org/viewtopic-p-8694208.html?sid=c47a21173fe5bee690cfd82cd06bf96b][Gentoo Forums :: View topic - emacs rust clippy integration issue [fixed]​]]
 #+BEGIN_SRC emacs-lisp
-(prefer-coding-system 'utf-8)
-(set-default-coding-systems 'utf-8)
-(set-terminal-coding-system 'utf-8)
-(set-keyboard-coding-system 'utf-8)
+  (prefer-coding-system 'utf-8)
+  (set-default-coding-systems 'utf-8)
+  (set-terminal-coding-system 'utf-8)
+  (set-keyboard-coding-system 'utf-8)
 
-;; hippie expand is dabbrev expand on steroids
-(setq hippie-expand-try-functions-list '(try-expand-dabbrev
-                                         try-expand-dabbrev-all-buffers
-                                         try-expand-dabbrev-from-kill
-                                         try-complete-file-name-partially
-                                         try-complete-file-name
-                                         try-expand-all-abbrevs
-                                         try-expand-list
-                                         try-expand-line
-                                         try-complete-lisp-symbol-partially
-                                         try-complete-lisp-symbol))
+  ;; hippie expand is dabbrev expand on steroids
+  (setq hippie-expand-try-functions-list '(try-expand-dabbrev
+                                           try-expand-dabbrev-all-buffers
+                                           try-expand-dabbrev-from-kill
+                                           try-complete-file-name-partially
+                                           try-complete-file-name
+                                           try-expand-all-abbrevs
+                                           try-expand-list
+                                           try-expand-line
+                                           try-complete-lisp-symbol-partially
+                                           try-complete-lisp-symbol))
 
-;; use hippie-expand instead of dabbrev
-(global-set-key (kbd "M-/") #'hippie-expand)
-(global-set-key (kbd "s-/") #'hippie-expand)
+  ;; use hippie-expand instead of dabbrev
+  (global-set-key (kbd "M-/") #'hippie-expand)
+  (global-set-key (kbd "s-/") #'hippie-expand)
 
-  ;; abbrev mode setup
-(use-package abbrev
-  :ensure nil
-  :diminish abbrev-mode
-  :config
-  (if (file-exists-p abbrev-file-name)
-      (quietly-read-abbrev-file)))
+    ;; abbrev mode setup
+  ;; (use-package abbrev
+  ;;   :ensure nil
+  ;;   :diminish abbrev-mode
+  ;;   :config
+  ;;   (if (file-exists-p abbrev-file-name)
+  ;;       (quietly-read-abbrev-file)))
 
-(use-package flyspell
-  :config
-    (when (eq system-type 'windows-nt)
-      (add-to-list 'exec-path "C:/Program Files (x86)/Aspell/bin/"))
-    (setq ispell-program-name "aspell" ; use aspell instead of ispell
-         ispell-extra-args '("--sug-mode=ultra"))
-    (add-hook 'text-mode-hook #'flyspell-mode)
-    (add-hook 'prog-mode-hook #'flyspell-prog-mode)
-  :delight "")
+  (use-package flyspell
+    :config
+      (when (eq system-type 'windows-nt)
+        (add-to-list 'exec-path "C:/Program Files (x86)/Aspell/bin/"))
+      (setq ispell-program-name "aspell" ; use aspell instead of ispell
+           ispell-extra-args '("--sug-mode=ultra"))
+      (add-hook 'text-mode-hook #'flyspell-mode)
+      (add-hook 'prog-mode-hook #'flyspell-prog-mode)
+    :delight "")
 
-(use-package flycheck
-  :ensure t
-  :config
-  (add-hook 'after-init-hook #'global-flycheck-mode)
-  :delight "")
+  (use-package flycheck
+    :ensure t
+    :config
+    (add-hook 'after-init-hook #'global-flycheck-mode)
+    :delight "")
 
 #+END_SRC
 **** Red Warnings
@@ -638,7 +644,7 @@ company mode TAB
 *** Files
 
 Use dired Plus dired-x
-#+BEGIN_SRC emacs-lisp
+#+BEGIN_SRC emacs-lisp :tangle no
    (use-package dired
      :ensure nil
    ;  :defer t
@@ -851,29 +857,29 @@ going to install it and make sure it's loaded immediately.
 *** Ido
 
 #+BEGIN_SRC emacs-lisp
-(use-package ibuffer
-  :bind ("C-x C-b" . ibuffer))
+  (use-package ibuffer
+    :bind ("C-x C-b" . ibuffer))
 
-(use-package ibuffer-projectile
-  :ensure t
-  :config
-  (add-hook 'ibuffer-hook #'ibuffer-projectile-set-filter-groups))
+  (use-package ibuffer-projectile
+    :ensure t
+    :config
+    (add-hook 'ibuffer-hook #'ibuffer-projectile-set-filter-groups))
 
-(use-package ido
-  :ensure t
-  :init (ido-mode)
-  :config
-  (setq ido-enable-flex-matching t
-        ido-completion-buffer nil
-        ido-use-faces nil))
+  (use-package ido
+    :ensure t
+    :init (ido-mode)
+    :config
+    (setq ido-enable-flex-matching t
+          ido-completion-buffer nil
+          ido-use-faces nil))
 
-(use-package flx-ido
-  :ensure t
-  :init (flx-ido-mode))
+  ;; (use-package flx-ido
+  ;;   :ensure t
+  ;;   :init (flx-ido-mode))
 
-(use-package ido-vertical-mode
-  :ensure t
-  :init (ido-vertical-mode))
+  (use-package ido-vertical-mode
+    :ensure t
+    :init (ido-vertical-mode))
 #+END_SRC
 *** Undo
 #+BEGIN_SRC emacs-lisp
@@ -882,13 +888,10 @@ going to install it and make sure it's loaded immediately.
   :ensure t)
 
 ;; Add parts of each file's directory to the buffer name if not unique
-(use-package uniquify
-   :ensure nil
-   :config
    (setq uniquify-buffer-name-style 'forward)
    (setq uniquify-separator "/")
    (setq uniquify-after-kill-buffer-p t)
-   (setq uniquify-ignore-buffers-re "^\\*"))
+   (setq uniquify-ignore-buffers-re "^\\*")
 
 #+END_SRC
 *** Org
@@ -1010,23 +1013,12 @@ package that automatically generates an up to date table of contents for us.
   #+END_SRC
 *** Elisp
 #+BEGIN_SRC emacs-lisp
-(use-package lisp-mode
-  :ensure nil
-;;  :delight "lisp"
-  :config
-;;  (defun gas-visit-ielm ()
-;;    "Switch to default `ielm' buffer.
-;;Start `ielm' if it's not already running."
-;;    (interactive)
-;;    (crux-start-or-switch-to 'ielm "*ielm*"))
-
   (add-hook 'emacs-lisp-mode-hook #'eldoc-mode)
   (add-hook 'emacs-lisp-mode-hook #'rainbow-delimiters-mode)
-;;  (define-key emacs-lisp-mode-map (kbd "C-c C-z") #'gas-visit-ielm)
   (define-key emacs-lisp-mode-map (kbd "C-c C-c") #'eval-defun)
   (define-key emacs-lisp-mode-map (kbd "C-c C-b") #'eval-buffer)
   (add-hook 'lisp-interaction-mode-hook #'eldoc-mode)
-  (add-hook 'eval-expression-minibuffer-setup-hook #'eldoc-mode))
+  (add-hook 'eval-expression-minibuffer-setup-hook #'eldoc-mode)
 
 (use-package ielm
   :config
